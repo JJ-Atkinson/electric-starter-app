@@ -32,7 +32,7 @@
               (swap! !client-db
                 #(-> %
                    (update :open-vars (fnil conj #{}) var)
-                   (assoc :search-box "")))))
+                   #_(assoc :search-box "")))))
           (dom/text var))))))
 
 (e/defn VarViewer
