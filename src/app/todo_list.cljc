@@ -13,9 +13,9 @@
 
 (e/defn SearchBox
   []
-  (dom/input (dom/props {:placeholder "Search Files"})
-    (dom/on "keyup" (e/fn [e]
-                        (swap! !client-db assoc :search-box (contrib.str/empty->nil (-> e .-target .-value)))))))
+  (ui/input (:search-box client-db) 
+    (e/fn [v] (swap! !client-db assoc :search-box (contrib.str/empty->nil v)))
+    (dom/props {:placeholder "Search Files"})))
 
 (e/defn VarList
   []
