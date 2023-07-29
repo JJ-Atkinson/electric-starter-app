@@ -29,7 +29,7 @@
 (defn search-vars
   [str]
   #?(:clj
-     (take 5
+     (take 10
        (let [names (keys vars-by-name)]
          (if (str/blank? str)
            names
