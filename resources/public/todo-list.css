@@ -56,3 +56,18 @@ label::first-letter{
 .count{
     font-size: 1.25rem;
 }
+
+.master-detail-view {
+    display: grid;
+    grid-template-areas: "masterlist detail";
+    grid-template-rows: auto;
+    grid-template-columns: 30em auto;
+    margin: 1em 0 1em;
+}
+
+.master-detail-view .master-view {
+    grid-area: masterlist;
+}
+.master-detail-view .detail-view {
+    grid-area: detail;
+}

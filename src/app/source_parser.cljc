@@ -29,11 +29,11 @@
 (defn search-vars
   [str]
   #?(:clj
-     (take 10
-       (let [names (keys vars-by-name)]
-         (if (str/blank? str)
-           names
-           (filter #(str/includes? % str) names))))))
+     #_(take 10)
+     (let [names (keys vars-by-name)]
+       (if (str/blank? str)
+         names
+         (filter #(str/includes? % str) names)))))
 
 (comment
   (println
