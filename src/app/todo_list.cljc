@@ -43,6 +43,8 @@
       (doseq [var open-vars]
         (dom/div
           (dom/h3 (dom/text var))
+          (ui/button (e/fn [] (swap! !client-db update :open-vars disj var)) 
+            (dom/span (dom/text "X")))
           (let [text (e/server (-> parser/vars-by-name
                                  (get var)
                                  (parser/get-definition)))]
