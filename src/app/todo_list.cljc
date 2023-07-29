@@ -24,7 +24,7 @@
     (dom/div
       (dom/h3
         (dom/text "Kondo located vars"))
-      (doseq [var vars]
+      (e/for-by identity [var vars]
         (dom/div
           (dom/on "click"
             (e/fn [e]
