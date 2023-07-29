@@ -1,0 +1,2 @@
+#!/bin/sh
+clj -A:local/devtools:dev -X jarrett.electric-starter-app/main

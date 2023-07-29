@@ -1,0 +1,2 @@
+#!/bin/sh
+clj-kondo --parallel --lint src --skip-lint > file-information.edn

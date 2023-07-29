@@ -3,67 +3,58 @@
             #?(:clj [datascript.core :as d]) ; database on server
             [hyperfiddle.electric :as e]
             [hyperfiddle.electric-dom2 :as dom]
-            [hyperfiddle.electric-ui4 :as ui]))
+            [hyperfiddle.electric-ui4 :as ui]
+            [contrib.electric-codemirror :as ecm]
+            [app.source-parser :as parser]))
 
-#?(:clj (defonce !conn (d/create-conn {}))) ; database on server
-(e/def db) ; injected database ref; Electric defs are always dynamic
+(def !client-db #?(:cljs (atom {})
+                   :clj nil))
+(e/def client-db)
 
-(e/defn TodoItem [id]
-  (e/server
-    (let [e (d/entity db id)
-          status (:task/status e)]
-      (e/client
+(e/defn SearchBox
+  []
+  (dom/input (dom/props {:placeholder "Search Files"})
+    (dom/on "keyup" (e/fn [e]
+                        (swap! !client-db assoc :search-box (contrib.str/empty->nil (-> e .-target .-value)))))))
+
+(e/defn VarList
+  []
+  (let [])
+  (let [{:keys [search-box]} client-db
+        vars (e/server (parser/search-vars search-box))]
+    (dom/div
+      (dom/h3
+        (dom/text "Kondo located vars"))
+      (doseq [var vars]
         (dom/div
-          (ui/checkbox
-            (case status :active false, :done true)
-            (e/fn [v]
-              (e/server
-                (d/transact! !conn [{:db/id id
-                                     :task/status (if v :done :active)}])
-                nil))
-            (dom/props {:id id}))
-          (dom/label (dom/props {:for id}) (dom/text (e/server (:task/description e)))))))))
+          (dom/on "click"
+            (e/fn [e]
+              (swap! !client-db
+                #(-> %
+                   (update :open-vars (fnil conj #{}) var)
+                   (assoc :search-box "")))))
+          (dom/text var))))))
 
-(e/defn InputSubmit [F]
-  ; Custom input control using lower dom interface for Enter handling
-  (dom/input (dom/props {:placeholder "Buy milk"})
-    (dom/on "keydown" (e/fn [e]
-                        (when (= "Enter" (.-key e))
-                          (when-some [v (contrib.str/empty->nil (-> e .-target .-value))]
-                            (new F v)
-                            (set! (.-value dom/node) "")))))))
+(e/defn VarViewer
+  []
+  (let [{:keys [open-vars]} client-db]
+    (dom/div
+      (dom/h3 (dom/text "Open files"))
+      (doseq [var open-vars]
+        (dom/div
+          (dom/h3 (dom/text var))
+          (let [text (e/server (-> parser/vars-by-name
+                                 (get var)
+                                 (parser/get-definition)))]
+            (new ecm/CodeMirror
+              {:parent dom/node}
+              identity identity text)))))))
 
-(e/defn TodoCreate []
+(e/defn App
+  []
   (e/client
-    (InputSubmit. (e/fn [v]
-                    (e/server
-                      (d/transact! !conn [{:task/description v
-                                           :task/status :active}])
-                      nil)))))
-
-#?(:clj (defn todo-count [db]
-          (count
-            (d/q '[:find [?e ...] :in $ ?status
-                   :where [?e :task/status ?status]] db :active))))
-
-#?(:clj (defn todo-records [db]
-          (->> (d/q '[:find [(pull ?e [:db/id :task/description]) ...]
-                      :where [?e :task/status]] db)
-            (sort-by :task/description))))
-
-(e/defn Todo-list []
-  (e/server
-    (binding [db (e/watch !conn)]
-      (e/client
-        (dom/link (dom/props {:rel :stylesheet :href "/todo-list.css"}))
-        (dom/h1 (dom/text "minimal todo list"))
-        (dom/p (dom/text "it's multiplayer, try two tabs"))
-        (dom/div (dom/props {:class "todo-list"})
-          (TodoCreate.)
-          (dom/div {:class "todo-items"}
-            (e/server
-              (e/for-by :db/id [{:keys [db/id]} (todo-records db)]
-                (TodoItem. id))))
-          (dom/p (dom/props {:class "counter"})
-            (dom/span (dom/props {:class "count"}) (dom/text (e/server (todo-count db))))
-            (dom/text " items left")))))))
+    (binding [client-db (e/watch !client-db)]
+      (dom/link (dom/props {:rel :stylesheet :href "/todo-list.css"}))
+      (SearchBox.)
+      (VarList.)
+      (VarViewer.))))

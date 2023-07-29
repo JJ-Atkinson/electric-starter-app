@@ -2,4 +2,13 @@
            hyperfiddle.electric/defn clojure.core/defn
            hyperfiddle.electric/for  clojure.core/for
            hyperfiddle.electric/fn   clojure.core/fn}
- :linters {:redundant-expression {:level :off}}}
+ :linters {:redundant-expression {:level :off}}
+ :analysis {:locals true
+            :keywords true 
+            :arglists true
+            :protocol-impls true 
+            :symbols true
+            :instance-invocations true
+            :namespace-definitions true
+            :var-definitions true}
+ :output {:format :edn}}
