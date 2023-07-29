@@ -1,4 +1,6 @@
-# Kondo Var Browser — Electric Clojure demo
+# clj-kondo var browser — Electric Clojure demo
+
+https://github.com/dustingetz/jatkins-kondo-browser/assets/124158/05e28bb5-0486-40fa-b78e-11af520a214d
 
 ```
 $ brew install borkdude/brew/clj-kondo
