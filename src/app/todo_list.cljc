@@ -13,38 +13,37 @@
 
 (e/defn SearchBox
   []
-  (dom/input (dom/props {:placeholder "Search Files"})
-    (dom/on "keyup" (e/fn [e]
-                        (swap! !client-db assoc :search-box (contrib.str/empty->nil (-> e .-target .-value)))))))
+  (ui/input (:search-box client-db) 
+    (e/fn [v] (swap! !client-db assoc :search-box (contrib.str/empty->nil v)))
+    (dom/props {:placeholder "Search Files"})))
 
 (e/defn VarList
   []
-  (let [])
   (let [{:keys [search-box]} client-db
         vars (e/server (parser/search-vars search-box))]
-    (dom/div
+    (dom/div (dom/props {:class "master-view"})
       (dom/h3
         (dom/text "Kondo located vars"))
-      (doseq [var vars]
+      (e/for-by identity [var vars]
         (dom/div
           (dom/on "click"
             (e/fn [e]
               (swap! !client-db
                 #(-> %
                    (update :open-vars (fnil conj #{}) var)
-                   (assoc :search-box "")))))
+                   #_(assoc :search-box "")))))
           (dom/text var))))))
 
 (e/defn VarViewer
   []
   (let [{:keys [open-vars]} client-db]
-    (dom/div
+    (dom/div (dom/props {:class "detail-view"})
       (dom/h3 (dom/text "Open files"))
       (doseq [var open-vars]
         (dom/div
-          (dom/h3 (dom/text var))
-          (ui/button (e/fn [] (swap! !client-db update :open-vars disj var)) 
-            (dom/span (dom/text "X")))
+          (dom/p (dom/text var " ")
+            (ui/button (e/fn [] (swap! !client-db update :open-vars disj var)) 
+              (dom/span (dom/text "close"))))
           (let [text (e/server (-> parser/vars-by-name
                                  (get var)
                                  (parser/get-definition)))]
@@ -58,5 +57,6 @@
     (binding [client-db (e/watch !client-db)]
       (dom/link (dom/props {:rel :stylesheet :href "/todo-list.css"}))
       (SearchBox.)
-      (VarList.)
-      (VarViewer.))))
+      (dom/div (dom/props {:class "master-detail-view"})
+        (VarList.)
+        (VarViewer.)))))
