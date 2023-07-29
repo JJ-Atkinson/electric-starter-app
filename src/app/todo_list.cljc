@@ -19,7 +19,6 @@
 
 (e/defn VarList
   []
-  (let [])
   (let [{:keys [search-box]} client-db
         vars (e/server (parser/search-vars search-box))]
     (dom/div
