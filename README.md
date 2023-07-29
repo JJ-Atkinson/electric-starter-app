@@ -1,6 +1,9 @@
-# electric-starter-app
+# Kondo Var Browser — Electric Clojure demo
 
 ```
+$ brew install borkdude/brew/clj-kondo
+$ npm install
+$ ./bin/kondo
 $ clj -A:dev -X user/main
 
 Starting Electric compiler and server...
